@@ -1,11 +1,14 @@
 package com.ideas2it.springboot.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <h1>Trainer </h1>
@@ -35,7 +38,7 @@ public class Trainer extends Employee {
             inverseJoinColumns = {@JoinColumn(name = "trainee_id")})
     @LazyCollection(LazyCollectionOption.FALSE)
     @JsonIgnore
-    private List<Trainee> trainee;
+    private Set<Trainee> trainee;
 
     public void setId(int id) {
         this.id = id;
@@ -61,11 +64,11 @@ public class Trainer extends Employee {
         return experience;
     }
 
-    public void setTraineeDetails(List<Trainee> trainee) {
+    public void setTraineeDetails(Set<Trainee> trainee) {
         this.trainee = trainee;
     }
 
-    public List<Trainee> getTraineeDetails() {
+    public Set<Trainee> getTraineeDetails() {
         return trainee;
     }
 

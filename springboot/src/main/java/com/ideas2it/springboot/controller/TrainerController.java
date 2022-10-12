@@ -1,6 +1,10 @@
 package com.ideas2it.springboot.controller;
 
 import com.ideas2it.springboot.Exception.EmployeeNotFoundException;
+import com.ideas2it.springboot.Helper.TraineeHelper;
+import com.ideas2it.springboot.Helper.TrainerHelper;
+import com.ideas2it.springboot.dto.TraineeDto;
+import com.ideas2it.springboot.dto.TrainerDto;
 import com.ideas2it.springboot.model.Trainee;
 import com.ideas2it.springboot.model.Trainer;
 import com.ideas2it.springboot.service.EmployeeService;
@@ -11,23 +15,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/trainer")
 @ControllerAdvice
 public class TrainerController {
-
-    public final EmployeeService employeeServiceImpl;
+    @Autowired
+    public EmployeeService employeeServiceImpl;
 
     private static final Logger logger = LoggerFactory.getLogger(Trainer.class);
 
-    public TrainerController(EmployeeService employeeServiceImpl) {
-        this.employeeServiceImpl = employeeServiceImpl;
-    }
 
     /**
      * method is used to get a request a data the user
@@ -37,9 +36,9 @@ public class TrainerController {
      * @return {@link Trainer} trainer object
      */
     @PostMapping("/add_trainer")
-    public String insertTrainer(@RequestBody Trainer trainer) throws Exception {
-        boolean isChecked = employeeServiceImpl.addTrainer(trainer);
-        if (isChecked) {
+    public String insertTrainer(@RequestBody TrainerDto trainerDto) throws Exception {
+        Trainer trainer = employeeServiceImpl.addTrainer(trainerDto);
+        if (null != trainer) {
             return "Insert Successfully";
         } else {
             return "not Inserted";
@@ -47,19 +46,10 @@ public class TrainerController {
     }
 
     @GetMapping(path = "/get_trainers")
-    public List<Map<String, Object>> getTrainer() throws Exception {
-        List<Map<String, Object>> trainerList = new ArrayList<>();
-        List<Trainer> trainers = employeeServiceImpl.getAllTrainer();
-        for (Trainer trainer : trainers) {
-            Map<String, Object> trainer1 = employeeServiceImpl.getTrainerObject(trainer);
-            trainerList.add(trainer1);
-        }
+    public List<TrainerDto> getTrainer() throws Exception {
+        //List<Map<String, Object>> trainerList = new ArrayList<>();
+        return employeeServiceImpl.getAllTrainer();
 
-        if (null != trainerList) {
-            return trainerList;
-        } else {
-            return null;
-        }
     }
 
 
@@ -68,23 +58,25 @@ public class TrainerController {
         int trainerId = id;
         Map<String, Object> getTrainer = null;
         Trainer trainer = employeeServiceImpl.getTrainer(trainerId);
-        if (null != trainer) {
+        if (!trainer.getIsRemoved()) {
+
             getTrainer = employeeServiceImpl.getTrainerObject(trainer);
+
             if (null != getTrainer) {
                 return getTrainer;
             } else {
                 return getTrainer;
             }
         } else {
-            throw new EmployeeNotFoundException(" ");
+            throw new EmployeeNotFoundException(" Trainer not Active");
         }
     }
 
     @PutMapping("/update_trainer")
-    public String updateTrainerById(@RequestBody Trainer trainer) throws Exception{
+    public String updateTrainerById(@RequestBody Trainer trainer) throws Exception {
         int trainerId = trainer.getId();
         Trainer trainer1 = employeeServiceImpl.getTrainer(trainerId);
-        boolean isChecked = false;
+
         if (null != trainer1) {
             Trainer trainer2 = employeeServiceImpl.updatedTrainerDetails(trainer);
             if (null != trainer2) {
@@ -93,46 +85,88 @@ public class TrainerController {
                 return "Not Updated";
             }
         } else {
-            throw new RuntimeException("");
+            throw new RuntimeException("Trainer id not found");
         }
     }
-    @PutMapping("/assign_trainer/{trainerid}/{traineeid}")
-    public String assigntrainer(@PathVariable int trainerid,
-                                @PathVariable String traineeid) throws Exception {
-        int id = trainerid;
-        String id1 = traineeid;
-        List<Trainee> list = employeeServiceImpl.getAllTrainee();
-        Trainer trainer = employeeServiceImpl.getTrainer(id);
-        if (trainer != null) {
-            String[] traineesId = id1.split(",");
-            int id2 = 0;
-            Trainer trainer1 = null;
-            boolean isChecked = false;
-            for (int i = 0; i < traineesId.length; i++) {
-                id2 = Integer.valueOf(traineesId[i]);
 
-                for (Trainee retriveTrainee : list) {
+    @DeleteMapping("/remove_trainer/{id}")
+    public String removeTrainerById(@PathVariable int id) throws Exception {
+        boolean isChecked = employeeServiceImpl.getTrainerId(id);
+        if (isChecked) {
+            Trainer trainer = employeeServiceImpl.deleteTrainerById(id);
 
-                    if (retriveTrainee.getId() == id2) {
-                        trainer.getTraineeDetails().add(retriveTrainee);
-                    }
-                    trainer1 = employeeServiceImpl.updatedTrainerDetails(trainer);
-                }
+            if (trainer.getIsRemoved()) {
+                return "deleted Sucessfully";
+            } else {
+                return " Trainer Id is not Active";
             }
-            if (null != trainer1) {
+        } else {
+            return "Trainer Id not available";
+        }
+    }
+
+    @PutMapping("/assign_trainer/{trainerId}/{traineeId}")
+    public String assignTrainer(@PathVariable("trainerId") int assignTrainerId,
+                                @PathVariable("traineeId") int assignTraineeId) throws Exception {
+        int trainerId = assignTrainerId;
+        int traineeId = assignTraineeId;
+        List<TraineeDto> list = employeeServiceImpl.getAllTrainee();
+        List<Trainee> traineeList = list.stream().map(trainee -> TraineeHelper.traineeDtoToTrainee(trainee))
+                                                            .collect(Collectors.toList());
+        Trainer trainer = employeeServiceImpl.getTrainer(trainerId);
+
+        if (trainer != null) {
+
+            for (Trainee retriveTrainee : traineeList) {
+
+                if (retriveTrainee.getId() == traineeId) {
+                    trainer.getTraineeDetails().add(retriveTrainee);
+                }
+
+                trainer = employeeServiceImpl.updatedTrainerDetails(trainer);
+            }
+
+            if (null != trainer) {
                 return ("Assigned Successful");
             } else {
                 return ("notAssigned");
             }
 
         } else {
-            return ("no trainee");
+            throw new EmployeeNotFoundException("no Trainer");
         }
 
     }
 
+    @PutMapping("/unAssign_trainer/{trainerId}/{traineeId}")
+    public String unAssignTrainer(@PathVariable int trainerId, @PathVariable int traineeId) throws Exception {
+
+        Trainer trainer = employeeServiceImpl.getTrainer(trainerId);
+        if (null != trainer) {
+            Set<Trainee> trainee = trainer.getTraineeDetails();
+            List<Trainee> traineeList = new ArrayList<>(trainee);
+
+            for (Trainee trainee1 : traineeList) {
+                if (trainee1.getId() == traineeId) {
+                    trainee.remove(trainee1);
+                }
+            }
+            trainer = employeeServiceImpl.updatedTrainerDetails(trainer);
+
+            if (null != trainer) {
+                return ("UnAssigned Successful");
+            } else {
+                return ("notAssigned");
+            }
+        } else {
+            return "no trainer";
+        }
+
+    }
+
+
     @ExceptionHandler(value = EmployeeNotFoundException.class)
     public String exceptionHandler(EmployeeNotFoundException e) {
-        return "Employeeid not found";
+        return e.getMessage();
     }
 }

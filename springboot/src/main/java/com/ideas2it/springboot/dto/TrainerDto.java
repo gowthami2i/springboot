@@ -1,55 +1,76 @@
-package com.ideas2it.springboot.model;
+package com.ideas2it.springboot.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.ideas2it.springboot.model.Trainee;
+import lombok.Builder;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.Period;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
-
-/**
- * <h1>Employee </h1>
- * Employee class is an pojo class.
- * Creating employee data in the program
- *
- * @author Gowtham P
- * @version java 1.0
- */
-@MappedSuperclass
-public class Employee {
-    // @Pattern(regexp = "[A-Za-z\\s]{2,29}")
-    //@NotEmpty(message = "Enter trhe valid name valid name")
-    @Column(name = "first_name")
+public class TrainerDto {
     private String firstName;
-
-    @Column(name = "last_name")
     private String lastName;
-
-    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
-
-    @Column(name = "mobilenumber")
     private long mobileNumber;
 
-    @Column(name = "date_of_joinning")
-    private LocalDate dateOfJoinning;
-    //  @Email(message = "Email should be valid")
-    @Column(name = "email")
     private String email;
-
-    @Column(name = "bloodgroup")
     private String bloodGroup;
 
-    @Column(name = "aadharnumber")
     private long aadharNumber;
 
-    @Column(name = "pancard")
     private String panCard;
+    private boolean isRemoved;
+    private LocalDate dateOfJoinning;
+    private int id;
 
-    @Column(name = "isremoved")
-  //  @ColumnDefault("0")
-        private boolean isRemoved = Boolean.FALSE;
+    private int project;
+
+    private int experience;
+
+    private Set<TraineeDto> traineeDtoList;
+
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getProject() {
+        return project;
+    }
+
+    public void setProject(int project) {
+        this.project = project;
+    }
+
+    public int getExperience() {
+        return experience;
+    }
+
+    public void setExperience(int experience) {
+        this.experience = experience;
+    }
+
+    public Set<TraineeDto> getTraineeDtoList() {
+
+        return traineeDtoList;
+    }
+
+    public void setTraineeDtoList(Set<TraineeDto> traineeDtoList) {
+
+        this.traineeDtoList = traineeDtoList;
+    }
+
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
@@ -132,4 +153,14 @@ public class Employee {
         this.isRemoved = isRemoved;
     }
 
+    public String toString() {
+        return ("Trainer Id" + getId() +
+                "Trainer First Name" + getFirstName() +
+                "Trainer LastName " + getLastName() +
+                "Trainer Mobile Number" + getMobileNumber() +
+                "Trainer Aadhar Number" + getAadharNumber() +
+                "Trainer Pan Card" + getPanCard() +
+                "Trainer Traineedetails" + getTraineeDtoList());
+    }
 }
+

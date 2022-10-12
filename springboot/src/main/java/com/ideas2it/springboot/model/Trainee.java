@@ -6,6 +6,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <h1>Trainee </h1>
@@ -31,11 +32,10 @@ public class Trainee extends Employee {
     private int task;
 
 
-    //@ManyToMany(targetEntity = Trainer.class,cascade = {CascadeType.ALL},fetch = FetchType.LAZY)
     @ManyToMany(mappedBy = "trainee", fetch = FetchType.LAZY)
     @LazyCollection(LazyCollectionOption.FALSE)
     @JsonIgnore
-    private List<Trainer> trainer;
+    private Set<Trainer> trainer;
 
     public void setId(int id) {
         this.id = id;
@@ -61,11 +61,11 @@ public class Trainee extends Employee {
         return task;
     }
 
-    public void setTrainerDetails(List<Trainer> trainer) {
+    public void setTrainerDetails(Set<Trainer> trainer) {
         this.trainer = trainer;
     }
 
-    public List<Trainer> getTrainerDetails() {
+    public Set<Trainer> getTrainerDetails() {
         return trainer;
     }
 
