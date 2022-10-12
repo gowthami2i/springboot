@@ -1,24 +1,29 @@
 package com.ideas2it.springboot.dto;
 
-import lombok.Builder;
-
-import javax.persistence.Column;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 public class TraineeDto {
-
+    @NotEmpty(message = "Enter the valid name valid name")
+    @Pattern(regexp = "[A-Za-z\\s]{2,29}", message = "Enter the valid name")
     private String firstName;
+    @Pattern(regexp = "[A-Za-z\\s]{0,3}", message = "Enter the valid last Name")
+    @NotEmpty(message = " Last Name is empty")
     private String lastName;
     private LocalDate dateOfBirth;
+    @Pattern(regexp = "(0/91)?[6-9][0-9]{9}", message = "Enter the valid mobile Number")
+    @NotEmpty(message = "mobile number is empty")
     private long mobileNumber;
-
+    @Email(message = "Enter the valid email id")
     private String email;
+    @Pattern(regexp = "(A|B|AB|O)[+-]", message = "enter the valid blood group")
     private String bloodGroup;
-
+    @Pattern(regexp = "[1-9]{12}", message = "Enter the valid aadharnumber")
     private long aadharNumber;
-
+    @Pattern(regexp = "[A-Z]{5}[0-9]{4}[A-Z]{1}", message = "Enter the valid pancard number")
     private String panCard;
     private boolean isRemoved;
     private LocalDate dateOfJoinning;
@@ -27,6 +32,7 @@ public class TraineeDto {
     private int task;
 
     private Set<TrainerDto> trainerDtoList;
+
     public String getFirstName() {
         return firstName;
     }
@@ -135,24 +141,20 @@ public class TraineeDto {
         this.trainerDtoList = trainerDtoList;
     }
 
-   public Set <TrainerDto> getTrainerDtoList() {
+    public Set<TrainerDto> getTrainerDtoList() {
         return trainerDtoList;
     }
 
-    public void setTrainerDtoList(List<TraineeDto> traineeDtoList) {
-        this.trainerDtoList = trainerDtoList;
-    }
-
+    @Override
     public String toString() {
-        return ("Trainee Id" +getId() +
-                "Trainee First Name" + getFirstName()+
-                "Trainee LastName "+getLastName()+
-                "Trainee Mobile Number"+ getMobileNumber()+
-                "Trainee Aadhar Number" + getAadharNumber()+
-                "Trainee Pan Card"+getPanCard()+
-                "Trainee Trainerdetails"+getTrainerDtoList());
+        return ("Trainee Id" + getId() +
+                "Trainee First Name" + getFirstName() +
+                "Trainee LastName " + getLastName() +
+                "Trainee Mobile Number" + getMobileNumber() +
+                "Trainee Aadhar Number" + getAadharNumber() +
+                "Trainee Pan Card" + getPanCard() +
+                "Trainee Trainerdetails" + getTrainerDtoList());
     }
-
 
 
 }

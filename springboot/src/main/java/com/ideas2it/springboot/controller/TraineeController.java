@@ -8,20 +8,21 @@ import com.ideas2it.springboot.dto.TrainerDto;
 import com.ideas2it.springboot.model.Trainee;
 import com.ideas2it.springboot.model.Trainer;
 import com.ideas2it.springboot.service.EmployeeService;
-import org.apache.catalina.Session;
-import org.apache.catalina.filters.ExpiresFilter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServlet;
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/trainee")
+@RequestMapping("/employee_management")
+@Validated
 public class TraineeController {
 
     public final EmployeeService employeeServiceImpl;
@@ -39,8 +40,8 @@ public class TraineeController {
      * @param {@link EmployeeService} employeeServiceImpl Object
      * @return {@link Trainer} trainer object
      */
-    @PostMapping("/add_trainee")
-    public String insertTrainee(@RequestBody TraineeDto traineeDto) throws Exception {
+    @PostMapping("/trainee")
+    public String insertTrainee( @Valid @RequestBody TraineeDto traineeDto) throws Exception {
         Trainee trainee = employeeServiceImpl.addTrainee(traineeDto);
         if (null != trainee) {
             return "Insert Successfully";
@@ -50,12 +51,12 @@ public class TraineeController {
 
     }
 
-    @GetMapping("/get_trainees")
+    @GetMapping("/trainees")
     public List<TraineeDto> getTrainees() throws Exception {
         return employeeServiceImpl.getAllTrainee();
     }
 
-    @GetMapping("/get_trainee/{id}")
+    @GetMapping("/trainee/{id}")
     public Map<String, Object> getTraineeById(@PathVariable int id) throws Exception {
         int traineeId = id;
         Map<String, Object> getTrainee = null;
@@ -74,8 +75,9 @@ public class TraineeController {
         }
     }
 
-    @PutMapping("/update_trainee")
-    public String updateTraineeById(@RequestBody Trainee trainee) throws Exception {
+    @PutMapping("/trainee")
+    public String updateTraineeById(@RequestBody TraineeDto updateTrainee) throws Exception {
+        Trainee trainee = TraineeHelper.traineeDtoToTrainee(updateTrainee);
         int traineeId = trainee.getId();
         Trainee trainee1 = employeeServiceImpl.getTrainee(traineeId);
 
@@ -91,7 +93,7 @@ public class TraineeController {
         }
     }
 
-    @DeleteMapping("/remove_trainee/{id}")
+    @DeleteMapping("/trainee/{id}")
     public String removeTraineeById(@PathVariable int id) throws Exception {
         boolean isChecked = employeeServiceImpl.getTraineeId(id);
         if (isChecked) {

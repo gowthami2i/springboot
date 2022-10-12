@@ -1,41 +1,44 @@
 package com.ideas2it.springboot.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.ideas2it.springboot.model.Trainee;
-import lombok.Builder;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
+import lombok.Data;
 
-import javax.persistence.*;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
-import java.time.Period;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
+@Data
 public class TrainerDto {
+
+    @NotEmpty(message = "Enter the valid name valid name")
+    @Pattern(regexp = "[A-Za-z\\s]{2,29}", message = "Enter the valid name")
     private String firstName;
+    @Pattern(regexp = "[A-Za-z\\s]{0,3}", message = "Enter the valid last Name")
+    @NotEmpty(message = " Last Name is empty")
     private String lastName;
     private LocalDate dateOfBirth;
-    private long mobileNumber;
+    //@Pattern(regexp = "(0/91)?[6-9][0-9]{9}", message = "Enter the valid mobile Number")
+    //@NotEmpty(message = "mobile number is empty")
 
+    private String mobileNumber;
+    @Email(message = "Enter the valid email id")
     private String email;
+    @Pattern(regexp = "(A|B|AB|O)[+-]",message = "enter the valid blood group")
     private String bloodGroup;
-
-    private long aadharNumber;
-
+    @Pattern(regexp = "[1-9]{12}",message = "Enter the valid aadharnumber")
+    private String aadharNumber;
+    @Pattern(regexp = "[A-Z]{5}[0-9]{4}[A-Z]{1}", message = "Enter the valid pancard number")
     private String panCard;
     private boolean isRemoved;
     private LocalDate dateOfJoinning;
     private int id;
-
+   // @Pattern(regexp = "[1-20]{2}]", message = "Enter the valid number of projects")
     private int project;
-
+  //  @Pattern(regexp = "[1-30]{2}", message = "Enter the valid experience")
     private int experience;
-
     private Set<TraineeDto> traineeDtoList;
-
 
     public int getId() {
         return id;
@@ -97,11 +100,11 @@ public class TrainerDto {
         return dateOfBirth;
     }
 
-    public long getMobileNumber() {
+    public String getMobileNumber() {
         return mobileNumber;
     }
 
-    public void setMobileNumber(long mobileNumber) {
+    public void setMobileNumber(String mobileNumber) {
         this.mobileNumber = mobileNumber;
     }
 
@@ -137,11 +140,11 @@ public class TrainerDto {
         this.panCard = panCard;
     }
 
-    public long getAadharNumber() {
+    public String getAadharNumber() {
         return aadharNumber;
     }
 
-    public void setAadharNumber(long aadharNumber) {
+    public void setAadharNumber(String aadharNumber) {
         this.aadharNumber = aadharNumber;
     }
 

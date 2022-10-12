@@ -18,8 +18,7 @@ import java.time.LocalDate;
  */
 @MappedSuperclass
 public class Employee {
-    // @Pattern(regexp = "[A-Za-z\\s]{2,29}")
-    //@NotEmpty(message = "Enter trhe valid name valid name")
+
     @Column(name = "first_name")
     private String firstName;
 

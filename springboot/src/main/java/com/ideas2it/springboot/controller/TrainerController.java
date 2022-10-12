@@ -3,24 +3,28 @@ package com.ideas2it.springboot.controller;
 import com.ideas2it.springboot.Exception.EmployeeNotFoundException;
 import com.ideas2it.springboot.Helper.TraineeHelper;
 import com.ideas2it.springboot.Helper.TrainerHelper;
+import com.ideas2it.springboot.dto.AssociationDto;
 import com.ideas2it.springboot.dto.TraineeDto;
 import com.ideas2it.springboot.dto.TrainerDto;
 import com.ideas2it.springboot.model.Trainee;
 import com.ideas2it.springboot.model.Trainer;
 import com.ideas2it.springboot.service.EmployeeService;
-import org.apache.catalina.Session;
-import org.apache.catalina.filters.ExpiresFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/trainer")
+@RequestMapping("/employee_management")
 @ControllerAdvice
+@Validated
 public class TrainerController {
     @Autowired
     public EmployeeService employeeServiceImpl;
@@ -35,8 +39,8 @@ public class TrainerController {
      * @param {@link EmployeeService} employeeServiceImpl Object
      * @return {@link Trainer} trainer object
      */
-    @PostMapping("/add_trainer")
-    public String insertTrainer(@RequestBody TrainerDto trainerDto) throws Exception {
+    @PostMapping("/trainer")
+    public String insertTrainer(@Valid @RequestBody TrainerDto trainerDto) throws Exception {
         Trainer trainer = employeeServiceImpl.addTrainer(trainerDto);
         if (null != trainer) {
             return "Insert Successfully";
@@ -45,7 +49,7 @@ public class TrainerController {
         }
     }
 
-    @GetMapping(path = "/get_trainers")
+    @GetMapping(path = "/trainers")
     public List<TrainerDto> getTrainer() throws Exception {
         //List<Map<String, Object>> trainerList = new ArrayList<>();
         return employeeServiceImpl.getAllTrainer();
@@ -53,14 +57,14 @@ public class TrainerController {
     }
 
 
-    @GetMapping("/get_trainer/{id}")
-    public Map<String, Object> getTrainerById(@PathVariable int id) throws Exception {
+    @GetMapping("/trainer/{id}")
+    public Trainer getTrainerById(@PathVariable int id) throws Exception {
         int trainerId = id;
-        Map<String, Object> getTrainer = null;
+        Trainer getTrainer = null;
         Trainer trainer = employeeServiceImpl.getTrainer(trainerId);
         if (!trainer.getIsRemoved()) {
 
-            getTrainer = employeeServiceImpl.getTrainerObject(trainer);
+            getTrainer = employeeServiceImpl.getTrainer(trainerId);
 
             if (null != getTrainer) {
                 return getTrainer;
@@ -72,10 +76,12 @@ public class TrainerController {
         }
     }
 
-    @PutMapping("/update_trainer")
-    public String updateTrainerById(@RequestBody Trainer trainer) throws Exception {
+    @PutMapping("/trainer")
+    public String updateTrainerById(@RequestBody TrainerDto updateTrainer) throws Exception {
+        Trainer trainer = TrainerHelper.trainerDtoToTrainer(updateTrainer);
         int trainerId = trainer.getId();
         Trainer trainer1 = employeeServiceImpl.getTrainer(trainerId);
+
 
         if (null != trainer1) {
             Trainer trainer2 = employeeServiceImpl.updatedTrainerDetails(trainer);
@@ -89,7 +95,7 @@ public class TrainerController {
         }
     }
 
-    @DeleteMapping("/remove_trainer/{id}")
+    @DeleteMapping("/trainer/{id}")
     public String removeTrainerById(@PathVariable int id) throws Exception {
         boolean isChecked = employeeServiceImpl.getTrainerId(id);
         if (isChecked) {
@@ -105,68 +111,83 @@ public class TrainerController {
         }
     }
 
-    @PutMapping("/assign_trainer/{trainerId}/{traineeId}")
-    public String assignTrainer(@PathVariable("trainerId") int assignTrainerId,
-                                @PathVariable("traineeId") int assignTraineeId) throws Exception {
-        int trainerId = assignTrainerId;
-        int traineeId = assignTraineeId;
-        List<TraineeDto> list = employeeServiceImpl.getAllTrainee();
-        List<Trainee> traineeList = list.stream().map(trainee -> TraineeHelper.traineeDtoToTrainee(trainee))
-                                                            .collect(Collectors.toList());
+    @PutMapping("/assign_trainer")
+    public String assignTrainer(@RequestBody AssociationDto assign) throws Exception {
+
+        int trainerId = assign.getTrainerId();
         Trainer trainer = employeeServiceImpl.getTrainer(trainerId);
+        if (null != trainer) {
+            List<Integer> assignTraineeId = assign.getTraineeId();
 
-        if (trainer != null) {
+            Trainee trainee = null;
+            for (Integer id : assignTraineeId) {
+                trainee = employeeServiceImpl.getTrainee(id);
+            }
+            if (trainee != null) {
 
-            for (Trainee retriveTrainee : traineeList) {
+                trainer.getTraineeDetails().add(trainee);
+                trainer = employeeServiceImpl.updatedTrainerDetails(trainer);
 
-                if (retriveTrainee.getId() == traineeId) {
-                    trainer.getTraineeDetails().add(retriveTrainee);
+                if (null != trainer) {
+                    return ("Assigned Successful");
+                } else {
+                    return ("notAssigned");
                 }
 
-                trainer = employeeServiceImpl.updatedTrainerDetails(trainer);
-            }
-
-            if (null != trainer) {
-                return ("Assigned Successful");
             } else {
-                return ("notAssigned");
+                throw new EmployeeNotFoundException("no Trainee");
             }
 
         } else {
             throw new EmployeeNotFoundException("no Trainer");
         }
-
     }
 
-    @PutMapping("/unAssign_trainer/{trainerId}/{traineeId}")
-    public String unAssignTrainer(@PathVariable int trainerId, @PathVariable int traineeId) throws Exception {
+    @PutMapping("/unAssign_trainer")
+    public String unAssignTrainer(@RequestBody AssociationDto unAssign) throws Exception {
 
+        int trainerId = unAssign.getTrainerId();
         Trainer trainer = employeeServiceImpl.getTrainer(trainerId);
+
         if (null != trainer) {
-            Set<Trainee> trainee = trainer.getTraineeDetails();
-            List<Trainee> traineeList = new ArrayList<>(trainee);
+            List<Integer> unAssignTraineeId = unAssign.getTraineeId();
+            Trainee trainee = null;
+            for (Integer traineeId : unAssignTraineeId) {
+                trainee = employeeServiceImpl.getTrainee(traineeId);
+            }
+            if (null != trainee) {
 
-            for (Trainee trainee1 : traineeList) {
-                if (trainee1.getId() == traineeId) {
-                    trainee.remove(trainee1);
+                trainer.getTraineeDetails().remove(trainee);
+
+
+                trainer = employeeServiceImpl.updatedTrainerDetails(trainer);
+
+                if (null != trainer) {
+                    return ("UnAssigned Successful");
+                } else {
+                    return ("notAssigned");
                 }
-            }
-            trainer = employeeServiceImpl.updatedTrainerDetails(trainer);
-
-            if (null != trainer) {
-                return ("UnAssigned Successful");
             } else {
-                return ("notAssigned");
+                return "no trainee";
             }
+
         } else {
-            return "no trainer";
+            throw new EmployeeNotFoundException("no Trainer");
         }
-
     }
-
 
     @ExceptionHandler(value = EmployeeNotFoundException.class)
-    public String exceptionHandler(EmployeeNotFoundException e) {
-        return e.getMessage();
+    public String exceptionHandler(EmployeeNotFoundException exception) {
+        return exception.getMessage();
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Map<String, String> handleInvalidArgument(MethodArgumentNotValidException exception) {
+        Map<String, String> errorMap = new HashMap<>();
+        exception.getBindingResult().getFieldErrors().forEach(error -> {
+            errorMap.put(error.getField(), error.getDefaultMessage());
+        });
+        return errorMap;
     }
 }

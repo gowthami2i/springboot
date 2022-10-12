@@ -1,7 +1,11 @@
 package com.ideas2it.springboot.Helper;
 
 import com.ideas2it.springboot.dto.TraineeDto;
+import com.ideas2it.springboot.dto.TrainerDto;
 import com.ideas2it.springboot.model.Trainee;
+import com.ideas2it.springboot.model.Trainer;
+
+import java.util.*;
 
 public class TraineeHelper {
     public static TraineeDto traineeTOTraineeDto(Trainee trainee) {
@@ -40,4 +44,15 @@ public class TraineeHelper {
 
         return trainee;
     }
+ /*   public Map<String, Object> getTraineeObject(Trainee trainee) {
+        TraineeDto trainee1 = TraineeHelper.traineeTOTraineeDto(trainee);
+        trainee1.getTrainerDtoList();
+        Set<TrainerDto>trainer =trainee1.getTrainerDtoList();
+
+
+
+
+        return map;
+        for()
+    }*/
 }
