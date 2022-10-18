@@ -1,24 +1,27 @@
 package com.ideas2it.springboot.controller;
 
-import com.ideas2it.springboot.Exception.EmployeeNotFoundException;
-import com.ideas2it.springboot.Helper.TraineeHelper;
-import com.ideas2it.springboot.Helper.TrainerHelper;
-import com.ideas2it.springboot.dto.TraineeDto;
-import com.ideas2it.springboot.dto.TrainerDto;
-import com.ideas2it.springboot.model.Trainee;
-import com.ideas2it.springboot.model.Trainer;
-import com.ideas2it.springboot.service.EmployeeService;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServlet;
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import javax.validation.Valid;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+
+import com.ideas2it.springboot.service.EmployeeService;
+import com.ideas2it.springboot.Exception.EmployeeNotFoundException;
+import com.ideas2it.springboot.Helper.TraineeHelper;
+import com.ideas2it.springboot.dto.TraineeDto;
+import com.ideas2it.springboot.model.Trainee;
+import com.ideas2it.springboot.model.Trainer;
 
 @RestController
 @RequestMapping("/employee_management")
@@ -41,7 +44,7 @@ public class TraineeController {
      * @return {@link Trainer} trainer object
      */
     @PostMapping("/trainee")
-    public String insertTrainee( @Valid @RequestBody TraineeDto traineeDto) throws Exception {
+    public String insertTrainee(@Valid @RequestBody TraineeDto traineeDto) throws Exception {
         Trainee trainee = employeeServiceImpl.addTrainee(traineeDto);
         if (null != trainee) {
             return "Insert Successfully";
@@ -108,43 +111,6 @@ public class TraineeController {
             return "Trainee Id not available";
         }
     }
-
-    @PutMapping("/assign_trainee/{traineeid}/{trainerid}")
-    public String assignTrainee(@PathVariable("traineeid") int assignTraineeId,
-                                @PathVariable("trainerid") int assignTrainerId) throws Exception {
-
-        List<TrainerDto> list = employeeServiceImpl.getAllTrainer();
-        List<Trainer> trainerList = list.stream().map(trainer -> TrainerHelper.trainerDtoToTrainer(trainer))
-                .collect(Collectors.toList());
-        Trainee trainee = employeeServiceImpl.getTrainee(assignTraineeId);
-
-
-        if (trainee != null) {
-
-            for (Trainer retriveTrainer : trainerList) {
-
-                if (retriveTrainer.getId() ==  assignTrainerId) {
-                    System.out.println(retriveTrainer.getId()+retriveTrainer.getFirstName());
-                    System.out.println(assignTrainerId);
-                    trainee.getTrainerDetails().add(retriveTrainer);
-                }
-                 trainee = employeeServiceImpl.updatedTraineeDetails(trainee);
-
-            }
-
-
-            if (null != trainee) {
-                return ("Assigned Successful");
-            } else {
-                return ("notAssigned");
-            }
-
-        } else {
-            throw new EmployeeNotFoundException("no Trainee");
-        }
-
-    }
-
 
 }
 

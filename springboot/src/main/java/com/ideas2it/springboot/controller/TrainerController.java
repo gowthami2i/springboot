@@ -1,29 +1,29 @@
 package com.ideas2it.springboot.controller;
 
-import com.ideas2it.springboot.Exception.EmployeeNotFoundException;
-import com.ideas2it.springboot.Helper.TraineeHelper;
-import com.ideas2it.springboot.Helper.TrainerHelper;
-import com.ideas2it.springboot.dto.AssociationDto;
-import com.ideas2it.springboot.dto.TraineeDto;
-import com.ideas2it.springboot.dto.TrainerDto;
-import com.ideas2it.springboot.model.Trainee;
-import com.ideas2it.springboot.model.Trainer;
-import com.ideas2it.springboot.service.EmployeeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.ideas2it.springboot.Exception.EmployeeNotFoundException;
+import com.ideas2it.springboot.Helper.TrainerHelper;
+import com.ideas2it.springboot.dto.AssociationDto;
+import com.ideas2it.springboot.dto.TrainerDto;
+import com.ideas2it.springboot.model.Trainee;
+import com.ideas2it.springboot.model.Trainer;
+import com.ideas2it.springboot.service.EmployeeService;
 
 @RestController
 @RequestMapping("/employee_management")
-@ControllerAdvice
 @Validated
 public class TrainerController {
     @Autowired
@@ -40,19 +40,14 @@ public class TrainerController {
      * @return {@link Trainer} trainer object
      */
     @PostMapping("/trainer")
-    public String insertTrainer(@Valid @RequestBody TrainerDto trainerDto) throws Exception {
-        Trainer trainer = employeeServiceImpl.addTrainer(trainerDto);
-        if (null != trainer) {
-            return "Insert Successfully";
-        } else {
-            return "not Inserted";
-        }
+    public String insertTrainer(@ModelAttribute Model model) throws Exception {
+        return "login.html";
     }
 
     @GetMapping(path = "/trainers")
-    public List<TrainerDto> getTrainer() throws Exception {
-        //List<Map<String, Object>> trainerList = new ArrayList<>();
-        return employeeServiceImpl.getAllTrainer();
+    public Model getTrainer(Model model) throws Exception {
+        model.addAttribute(employeeServiceImpl.getAllTrainer());
+        return model;
 
     }
 
